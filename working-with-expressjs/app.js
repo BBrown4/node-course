@@ -1,15 +1,13 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 
-app.use((req, res, next) => {
-  console.log("I'm in the middleware");
-  next(); //allows the request to continue to the next middleware in line
-});
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
-app.use((req, res, next) => {
-  console.log("I'm in the next middleware");
-  res.send('<h1>Hello from express</h1>');
-});
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(adminRoutes);
+app.use(shopRoutes);
 
 const PORT = process.env.PORT || 3000;
 
