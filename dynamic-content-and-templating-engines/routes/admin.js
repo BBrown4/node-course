@@ -8,8 +8,7 @@ const products = [];
 router.get('/add-product', (req, res) => {
   res.render('add-product', {
     pageTitle: 'Add product',
-    productCSS: true,
-    activeAddProduct: true,
+    path: '/admin/add-product',
   });
 });
 
