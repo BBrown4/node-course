@@ -1,0 +1,21 @@
+<%- include('./includes/head.ejs') %> <%- include('./includes/nav.ejs') %>
+
+<main>
+  <form action="/" method="post">
+    <h2>Add user</h2>
+    <div class="form__content">
+      <label for="user">Name</label>
+      <input
+        type="text"
+        name="user"
+        id="user"
+        autocomplete="off"
+        autofocus="on"
+        placeholder="Enter name"
+      />
+      <button type="submit">Add user</button>
+    </div>
+  </form>
+</main>
+
+<%- include('./includes/end.ejs') %>

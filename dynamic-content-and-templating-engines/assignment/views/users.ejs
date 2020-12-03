@@ -1,0 +1,13 @@
+<%- include('./includes/head.ejs') %> <%- include('./includes/nav.ejs') %>
+<main>
+  <% if (users.length > 0) { %>
+  <ul>
+    <% users.forEach(user => { %>
+    <li><%= user.name %></li>
+    <% }) %>
+  </ul>
+  <% } else {%>
+  <h1>No users found</h1>
+  <% } %>
+</main>
+<%- include('./includes/end.ejs') %>
