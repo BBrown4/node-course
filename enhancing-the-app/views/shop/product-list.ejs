@@ -11,13 +11,13 @@
                     <h1 class="product__title"><%= product.title %></h1>
                 </header>
                 <div class="card__image">
-                    <img src="https://images.unsplash.com/photo-1601318314960-e17a48ebb6f2?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=512&q=80"
-                        alt="An item">
+                    <img src="<%= product.imageUrl %>"
+                        alt="<%= product.title %>">
                 </div>
                 <div class="card__content">
-                    <h2 class="product__price">$19.99</h2>
+                    <h2 class="product__price">$<%= product.price %></h2>
                     <p class="product__description">
-                        A very interesting item that is sure to bring you happiness and other things that items bring.
+                        <%= product.description %>
                     </p>
                 </div>
                 <div class="card__actions">
