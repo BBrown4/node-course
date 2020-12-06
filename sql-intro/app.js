@@ -6,6 +6,7 @@ const app = express();
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 const errorController = require('./controllers/error.controller');
+const db = require('./util/db');
 
 // app.engine(
 //   'hbs',
