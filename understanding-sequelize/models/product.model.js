@@ -1,4 +1,3 @@
-const { DOUBLE } = require('sequelize');
 const Sequelize = require('sequelize');
 const sequelize = require('../util/db');
 
@@ -19,9 +18,9 @@ const Product = sequelize.define('product', {
     allowNull: false,
   },
   description: {
-      type: Sequelize.STRING,
-      allowNull = false
-  }
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
 });
 
 module.exports = Product;

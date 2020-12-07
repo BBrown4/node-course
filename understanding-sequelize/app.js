@@ -6,7 +6,7 @@ const app = express();
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 const errorController = require('./controllers/error.controller');
-const db = require('./util/db');
+const sequelize = require('./util/db');
 
 // app.engine(
 //   'hbs',
@@ -28,8 +28,17 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-const PORT = process.env.PORT || 3000;
+sequelize
+  .sync()
+  .then(result => {
+    // console.log(result);
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+    const PORT = process.env.PORT || 3000;
+
+    app.listen(PORT, () => {
+      console.log(`Server started on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    err;
+  });
