@@ -10,6 +10,10 @@ const sequelize = require('./util/db');
 
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
+const Cart = require('./models/cart.model');
+const CartItem = require('./models/cart-item.model');
+const Order = require('./models/order.model');
+const OrderItem = require('./models/order-item.model');
 
 // app.engine(
 //   'hbs',
@@ -45,6 +49,13 @@ app.use(errorController.get404);
 
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasMany(Product);
+User.hasOne(Cart);
+Cart.belongsTo(User);
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem });
 
 sequelize
   // .sync({ force: true })
@@ -63,6 +74,20 @@ sequelize
     return user;
   })
   .then(user => {
+    return user
+      .getCart()
+      .then(cart => {
+        if (!cart) {
+          return user.createCart();
+        }
+
+        return cart;
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  })
+  .then(cart => {
     const PORT = process.env.PORT || 3000;
 
     app.listen(PORT, () => {
