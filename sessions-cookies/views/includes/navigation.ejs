@@ -19,7 +19,7 @@
           >Orders</a
         >
       </li>
-      <% if (isAuthenticated) { %>
+      <% if (user) { %>
       <li class="main-header__item">
         <a
           class="<%= path === '/admin/add-product' ? 'active' : '' %>"

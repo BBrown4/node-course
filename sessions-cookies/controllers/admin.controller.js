@@ -1,11 +1,12 @@
 const Product = require('../models/product.model');
+const User = require('../models/user.model');
 
 exports.getAddProduct = (req, res) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add product',
     path: '/admin/add-product',
     editing: false,
-    isAuthenticated: req.isLoggedIn,
+    user: req.session.user,
   });
 };
 
@@ -15,15 +16,17 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  req.user
-    .createProduct({
-      title: title,
-      price: price,
-      imageUrl: imageUrl,
-      description: description,
+  User.findByPk(req.session.user.id)
+    .then(user => {
+      return user.createProduct({
+        title: title,
+        price: price,
+        imageUrl: imageUrl,
+        description: description,
+      });
     })
-    .then(result => {
-      res.redirect('/admin/products');
+    .then(() => {
+      res.redirect('/');
     })
     .catch(err => {
       console.log(err);
@@ -37,8 +40,11 @@ exports.getEditProduct = (req, res) => {
   }
 
   const prodId = req.params.productId;
-  req.user
-    .getProducts({ where: { id: prodId } })
+
+  User.findByPk(req.session.user.id)
+    .then(user => {
+      return user.getProducts({ where: { id: prodId } });
+    })
     .then(products => {
       const product = products[0];
       if (!product) return res.redirect('/');
@@ -48,7 +54,7 @@ exports.getEditProduct = (req, res) => {
         pageTitle: 'Edit product',
         path: '/admin/edit-product',
         editing: editMode,
-        isAuthenticated: req.isLoggedIn,
+        user: req.session.user,
       });
     })
     .catch(err => {
@@ -72,7 +78,7 @@ exports.postEditProduct = (req, res, next) => {
 
       return product.save();
     })
-    .then(result => {
+    .then(() => {
       res.redirect('/admin/products');
     })
     .catch(err => {
@@ -85,7 +91,7 @@ exports.postDeleteProduct = (req, res, next) => {
     .then(product => {
       return product.destroy();
     })
-    .then(result => {
+    .then(() => {
       res.redirect('/admin/products');
     })
     .catch(err => {
@@ -94,14 +100,16 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  req.user
-    .getProducts()
+  User.findByPk(req.session.user.id)
+    .then(user => {
+      return user.getProducts();
+    })
     .then(products => {
       res.render('admin/product-list', {
         prods: products,
         pageTitle: 'Admin products',
         path: '/admin/products',
-        isAuthenticated: req.isLoggedIn,
+        user: req.session.user,
       });
     })
     .catch(err => {

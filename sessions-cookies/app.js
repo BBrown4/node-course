@@ -2,12 +2,13 @@ const express = require('express');
 // const expressHbs = require('express-handlebars');
 const bodyParser = require('body-parser');
 const path = require('path');
-const app = express();
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 const authRoutes = require('./routes/auth.routes');
 const errorController = require('./controllers/error.controller');
 const sequelize = require('./util/db');
+const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
@@ -15,6 +16,8 @@ const Cart = require('./models/cart.model');
 const CartItem = require('./models/cart-item.model');
 const Order = require('./models/order.model');
 const OrderItem = require('./models/order-item.model');
+
+const app = express();
 
 // app.engine(
 //   'hbs',
@@ -32,16 +35,35 @@ app.set('views', 'views');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
-  User.findByPk(1)
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(err => {
-      console.log(err);
-    });
+const sessionStore = new SequelizeStore({
+  db: sequelize,
 });
+
+app.use(
+  session({
+    secret: 'a0658ef0-6e7e-4eaa-ae07-a98388772fc8',
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+sessionStore.sync();
+
+// app.use((req, res, next) => {
+//   if (req.session.user) {
+//     User.findByPk(req.session.user.id)
+//       .then(user => {
+//         req.user = user;
+//         next();
+//       })
+//       .catch(err => {
+//         console.log(err);
+//       });
+//   } else {
+//     next();
+//   }
+// });
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
