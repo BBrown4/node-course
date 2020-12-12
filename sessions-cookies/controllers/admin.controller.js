@@ -100,6 +100,10 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/');
+  }
+
   User.findByPk(req.session.user.id)
     .then(user => {
       return user.getProducts();

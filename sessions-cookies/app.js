@@ -16,6 +16,7 @@ const Cart = require('./models/cart.model');
 const CartItem = require('./models/cart-item.model');
 const Order = require('./models/order.model');
 const OrderItem = require('./models/order-item.model');
+const { clear } = require('console');
 
 const app = express();
 

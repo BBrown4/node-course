@@ -12,9 +12,11 @@ exports.postLogin = (req, res, next) => {
   User.findByPk(1)
     .then(user => {
       req.session.user = user;
-    })
-    .then(() => {
-      res.redirect('/');
+      req.session.save(err => {
+        if (err) return console.log(err);
+
+        res.redirect('/');
+      });
     })
     .catch(err => console.log(err));
 };
