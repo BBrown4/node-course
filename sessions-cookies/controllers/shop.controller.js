@@ -48,6 +48,8 @@ exports.getProductById = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
+  if (!req.session.user) return res.redirect('/');
+
   User.findByPk(req.session.user.id)
     .then(user => {
       return user.getCart();
@@ -170,6 +172,8 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
+  if (!req.session.user) return res.redirect('/');
+
   User.findByPk(req.session.user.id)
     .then(user => {
       return user.getOrders({ include: ['products'] });

@@ -57,6 +57,24 @@ form {
   color: #aaa;
 }
 
+button.main-header__logout {
+  font-size: inherit;
+  text-decoration: none;
+  color: #aaa;
+  border: none;
+  background: transparent;
+}
+
+button.main-header__logout:hover,
+button.main-header__logout:active,
+button.main-header__logout:focus {
+  color: #fff;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
 .main-header__item a:hover,
 .main-header__item a:active,
 .main-header__item a.active {
