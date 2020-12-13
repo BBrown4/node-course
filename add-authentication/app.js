@@ -85,34 +85,7 @@ Order.belongsToMany(Product, { through: OrderItem });
 sequelize
   // .sync({ force: true })
   .sync()
-  .then(result => {
-    return User.findByPk(1);
-  })
-  .then(user => {
-    if (!user) {
-      return User.create({
-        name: 'Brandon',
-        email: 'brandon@firecreststudios.com',
-      });
-    }
-
-    return user;
-  })
-  .then(user => {
-    return user
-      .getCart()
-      .then(cart => {
-        if (!cart) {
-          return user.createCart();
-        }
-
-        return cart;
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  })
-  .then(cart => {
+  .then(() => {
     const PORT = process.env.PORT || 3000;
 
     app.listen(PORT, () => {
