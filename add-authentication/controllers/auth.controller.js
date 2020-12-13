@@ -29,18 +29,26 @@ exports.postSignup = (req, res, next) => {
     .then(user => {
       if (user) return res.redirect('/signup');
 
-      return User.create({
-        email: email,
-        password: password,
-      });
-    })
-    .then(user => {
-      if (user) {
-        user.createCart();
-      }
-    })
-    .then(result => {
-      res.redirect('/login');
+      return bcrypt
+        .hash(password, 12)
+        .then(hash => {
+          return User.create({
+            email: email,
+            password: hash,
+          });
+        })
+        .then(user => {
+          if (user) {
+            user.createCart();
+          }
+        })
+        .then(result => {
+          // res.redirect('/login');
+          next();
+        })
+        .catch(err => {
+          console.log(err);
+        });
     })
     .catch(err => {
       console.log(err);
@@ -48,14 +56,30 @@ exports.postSignup = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
-  User.findByPk(1)
-    .then(user => {
-      req.session.user = user;
-      req.session.save(err => {
-        if (err) return console.log(err);
+  const email = req.body.email;
+  const password = req.body.password;
 
-        res.redirect('/');
-      });
+  User.findOne({ where: { email: email } })
+    .then(user => {
+      if (!user) {
+        return res.redirect('/login');
+      }
+      bcrypt
+        .compare(password, user.password)
+        .then(doMatch => {
+          if (!doMatch) return res.redirect('/login');
+
+          req.session.user = user;
+          req.session.save(err => {
+            if (err) return console.log(err);
+
+            res.redirect('/');
+          });
+        })
+        .catch(err => {
+          console.log(err);
+          res.redirect('/login');
+        });
     })
     .catch(err => console.log(err));
 };

@@ -2,8 +2,6 @@ const Product = require('../models/product.model');
 const User = require('../models/user.model');
 
 exports.getAddProduct = (req, res) => {
-  if (!req.session.user) return res.redirect('/');
-
   res.render('admin/edit-product', {
     pageTitle: 'Add product',
     path: '/admin/add-product',
@@ -36,8 +34,6 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getEditProduct = (req, res) => {
-  if (!req.session.user) return res.redirect('/');
-
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect('/');
@@ -104,10 +100,6 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/');
-  }
-
   User.findByPk(req.session.user.id)
     .then(user => {
       return user.getProducts();

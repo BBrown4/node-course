@@ -8,6 +8,6 @@ router.post('/login', authController.postLogin);
 router.get('/logout', (req, res, next) => res.redirect('/'));
 router.post('/logout', authController.postLogout);
 router.get('/signup', authController.getSignup);
-router.post('/signup', authController.postSignup);
+router.post('/signup', authController.postSignup, authController.postLogin);
 
 module.exports = router;
