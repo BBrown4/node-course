@@ -9,6 +9,8 @@ const errorController = require('./controllers/error.controller');
 const sequelize = require('./util/db');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
@@ -16,7 +18,6 @@ const Cart = require('./models/cart.model');
 const CartItem = require('./models/cart-item.model');
 const Order = require('./models/order.model');
 const OrderItem = require('./models/order-item.model');
-const { clear } = require('console');
 
 const app = express();
 
@@ -29,6 +30,9 @@ const app = express();
 //   })
 // );
 // app.set('view engine', 'hbs');
+
+const csrfProtection = csrf();
+app.use(flash());
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -48,23 +52,13 @@ app.use(
     saveUninitialized: false,
   })
 );
-
 sessionStore.sync();
 
-// app.use((req, res, next) => {
-//   if (req.session.user) {
-//     User.findByPk(req.session.user.id)
-//       .then(user => {
-//         req.user = user;
-//         next();
-//       })
-//       .catch(err => {
-//         console.log(err);
-//       });
-//   } else {
-//     next();
-//   }
-// });
+app.use(csrfProtection);
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
