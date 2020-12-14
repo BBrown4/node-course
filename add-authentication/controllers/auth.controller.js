@@ -2,14 +2,29 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 
 exports.getLogin = (req, res, next) => {
+  let message = req.flash('error');
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
     user: req.session.user,
+    errorMessage: message,
   });
 };
 
 exports.getSignup = (req, res, next) => {
+  let message = req.flash('error');
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+
   if (req.session.user) {
     return res.redirect('/');
   }
@@ -18,8 +33,10 @@ exports.getSignup = (req, res, next) => {
     path: '/signup',
     pageTitle: 'Signup',
     user: req.session.user,
+    errorMessage: message,
   });
 };
+
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -27,7 +44,12 @@ exports.postSignup = (req, res, next) => {
 
   User.findOne({ where: { email: email } })
     .then(user => {
-      if (user) return res.redirect('/signup');
+      if (user) {
+        req.flash('error', 'An account with that email already exists');
+        return req.session.save(() => {
+          res.redirect('/signup');
+        });
+      }
 
       return bcrypt
         .hash(password, 12)
@@ -62,12 +84,21 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ where: { email: email } })
     .then(user => {
       if (!user) {
-        return res.redirect('/login');
+        req.flash('error', 'Invalid email');
+        return req.session.save(() => {
+          res.redirect('/login');
+        });
       }
+
       bcrypt
         .compare(password, user.password)
         .then(doMatch => {
-          if (!doMatch) return res.redirect('/login');
+          if (!doMatch) {
+            req.flash('error', 'Invalid password');
+            return req.session.save(() => {
+              res.redirect('/login');
+            });
+          }
 
           req.session.user = user;
           req.session.save(err => {

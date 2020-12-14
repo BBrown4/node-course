@@ -216,16 +216,6 @@ button.main-header__logout:focus {
   color: white;
 }
 
-@media (min-width: 768px) {
-  .main-header__nav {
-    display: flex;
-  }
-
-  #side-menu-toggle {
-    display: none;
-  }
-}
-
 .form-control {
   margin: 1rem 0;
 }
@@ -248,4 +238,34 @@ button.main-header__logout:focus {
 .form-control input:focus,
 .form-control textarea:focus {
   outline-color: #000000;
+}
+
+.user-message {
+  margin: auto;
+  width: 90%;
+  border: 1px solid #88a1d7;
+  background: #c3d4ff;
+  color: #0063ba;
+  padding: 1rem;
+  border-radius: 3px;
+}
+
+.user-message__error {
+  border: 1px solid #c38181;
+  background: #ffb5b5;
+  color: #a70000;
+}
+
+@media (min-width: 768px) {
+  .main-header__nav {
+    display: flex;
+  }
+
+  #side-menu-toggle {
+    display: none;
+  }
+
+  .user-message {
+    width: 30rem;
+  }
 }
