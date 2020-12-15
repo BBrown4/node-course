@@ -240,6 +240,19 @@ button.main-header__logout:focus {
   outline-color: #000000;
 }
 
+.form-control__forgot-password {
+  color: #b8b8b8;
+  font-size: 0.8rem;
+  text-decoration: none;
+  margin: 0 1rem;
+}
+
+.form-control__forgot-password:hover,
+.form-control__forgot-password:active,
+.form-control__forgot-password:focus {
+  color: #858585;
+}
+
 .user-message {
   margin: auto;
   width: 90%;
@@ -254,6 +267,12 @@ button.main-header__logout:focus {
   border: 1px solid #c38181;
   background: #ffb5b5;
   color: #a70000;
+}
+
+.user-message__success {
+  border: 1px solid #4e8343;
+  background: #b5dfa0;
+  color: #1ca015;
 }
 
 @media (min-width: 768px) {
