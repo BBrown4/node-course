@@ -1,5 +1,14 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  host: 'smtp.mailtrap.io',
+  port: 2525,
+  auth: {
+    user: '66912f73259652',
+    pass: '540714982e9b3a',
+  },
+});
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash('error');
@@ -64,8 +73,17 @@ exports.postSignup = (req, res, next) => {
             user.createCart();
           }
         })
-        .then(result => {
+        .then(() => {
           // res.redirect('/login');
+          return transporter.sendMail({
+            to: email,
+            from: '"no-reply" <no-reply@firecreststudios.com>',
+            subject: 'Registration',
+            html:
+              '<h1>Account registration complete!</h1> <p>This is an auto generated email, <strong>do not reply</strong></p>',
+          });
+        })
+        .then(() => {
           next();
         })
         .catch(err => {
