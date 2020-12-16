@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { Op } = require('sequelize');
 const User = require('../models/user.model');
 const nodemailer = require('nodemailer');
+const { validationResult } = require('express-validator');
 const transporter = nodemailer.createTransport({
   host: 'smtp.mailtrap.io',
   port: 2525,
@@ -55,44 +56,40 @@ exports.getSignup = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
+  const errors = validationResult(req);
 
-  User.findOne({ where: { email: email } })
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/signup', {
+      path: '/signup',
+      pageTitle: 'Signup',
+      user: req.session.user,
+      errorMessage: errors.array()[0].msg,
+    });
+  }
+
+  bcrypt
+    .hash(password, 12)
+    .then(hash => {
+      return User.create({
+        email: email,
+        password: hash,
+      });
+    })
     .then(user => {
       if (user) {
-        req.flash('error', 'An account with that email already exists');
-        return req.session.save(() => {
-          res.redirect('/signup');
-        });
+        user.createCart();
       }
-
-      return bcrypt
-        .hash(password, 12)
-        .then(hash => {
-          return User.create({
-            email: email,
-            password: hash,
-          });
-        })
-        .then(user => {
-          if (user) {
-            user.createCart();
-          }
-        })
-        .then(() => {
-          // res.redirect('/login');
-          next();
-          return transporter.sendMail({
-            to: email,
-            from: '"no-reply" <no-reply@firecreststudios.com>',
-            subject: 'Registration',
-            html:
-              '<h1>Account registration complete!</h1> <p>This is an auto generated email, <strong>do not reply</strong></p>',
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
+    })
+    .then(() => {
+      // res.redirect('/login');
+      next();
+      return transporter.sendMail({
+        to: email,
+        from: '"no-reply" <no-reply@firecreststudios.com>',
+        subject: 'Registration',
+        html:
+          '<h1>Account registration complete!</h1> <p>This is an auto generated email, <strong>do not reply</strong></p>',
+      });
     })
     .catch(err => {
       console.log(err);
