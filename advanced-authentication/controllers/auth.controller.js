@@ -81,6 +81,7 @@ exports.postSignup = (req, res, next) => {
         })
         .then(() => {
           // res.redirect('/login');
+          next();
           return transporter.sendMail({
             to: email,
             from: '"no-reply" <no-reply@firecreststudios.com>',
@@ -88,9 +89,6 @@ exports.postSignup = (req, res, next) => {
             html:
               '<h1>Account registration complete!</h1> <p>This is an auto generated email, <strong>do not reply</strong></p>',
           });
-        })
-        .then(() => {
-          next();
         })
         .catch(err => {
           console.log(err);

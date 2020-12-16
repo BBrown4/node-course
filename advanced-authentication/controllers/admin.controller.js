@@ -47,7 +47,7 @@ exports.getEditProduct = (req, res) => {
     })
     .then(products => {
       const product = products[0];
-      if (!product) return res.redirect('/');
+      if (!product) return res.redirect('/admin/products');
 
       res.render('admin/edit-product', {
         product: product,
@@ -71,6 +71,8 @@ exports.postEditProduct = (req, res, next) => {
 
   Product.findByPk(prodId)
     .then(product => {
+      if (product.userId !== req.session.user.id) return next();
+
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.imageUrl = updatedImgUrl;
@@ -89,6 +91,8 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   Product.findByPk(req.body.productId)
     .then(product => {
+      if (product.userId !== req.session.user.id) return next();
+
       return product.destroy();
     })
     .then(() => {
