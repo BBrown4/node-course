@@ -11,17 +11,17 @@
         <% } %>
 
         <form class="login-form" action="/signup" method="POST">
-            <div class="form-control">
+            <div class="form-control <%= validationErrors.find(e => e.param === 'email') ? 'invalid' : '' %>">
                 <label for="email">E-Mail</label>
-                <input type="email" name="email" id="email" autofocus="on">
+                <input type="email" name="email" id="email" autofocus="on" value="<%= oldInput.email %>">
             </div>
-            <div class="form-control">
+            <div class="form-control <%= validationErrors.find(e => e.param === 'password') ? 'invalid' : '' %>">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" autocomplete="off">
+                <input type="password" name="password" id="password" autocomplete="off" value="<%= oldInput.password %>">
             </div>
-            <div class="form-control">
+            <div class="form-control <%= validationErrors.find(e => e.param === 'confirmPassword') ? 'invalid' : '' %>">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword" autocomplete="off">
+                <input type="password" name="confirmPassword" id="confirmPassword" autocomplete="off" value="<%= oldInput.confirmPassword %>">
             </div>
           
             <input type="hidden" name="_csrf" value="<%= csrfToken %>" />

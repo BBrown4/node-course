@@ -30,6 +30,8 @@ exports.getLogin = (req, res, next) => {
     user: req.session.user,
     messageType: messageType,
     message: message,
+    validationErrors: [],
+    oldInput: { email: '' },
   });
 };
 
@@ -50,12 +52,15 @@ exports.getSignup = (req, res, next) => {
     pageTitle: 'Signup',
     user: req.session.user,
     errorMessage: message,
+    oldInput: { email: '', password: '', confirmPassword: '' },
+    validationErrors: [],
   });
 };
 
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -64,6 +69,12 @@ exports.postSignup = (req, res, next) => {
       pageTitle: 'Signup',
       user: req.session.user,
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword,
+      },
+      validationErrors: errors.array(),
     });
   }
 
@@ -99,13 +110,29 @@ exports.postSignup = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/login', {
+      path: '/login',
+      pageTitle: 'Login',
+      user: req.session.user,
+      messageType: 'error',
+      message: errors.array()[0].msg,
+      oldInput: { email: email },
+    });
+  }
 
   User.findOne({ where: { email: email } })
     .then(user => {
       if (!user) {
-        req.flash('error', 'Invalid email');
-        return req.session.save(() => {
-          res.redirect('/login');
+        return res.status(422).render('auth/login', {
+          path: '/login',
+          pageTitle: 'Login',
+          user: req.session.user,
+          messageType: 'error',
+          message: 'No account with that email address exists',
+          oldInput: { email: email },
         });
       }
 
@@ -113,9 +140,13 @@ exports.postLogin = (req, res, next) => {
         .compare(password, user.password)
         .then(doMatch => {
           if (!doMatch) {
-            req.flash('error', 'Invalid password');
-            return req.session.save(() => {
-              res.redirect('/login');
+            return res.status(422).render('auth/login', {
+              path: '/login',
+              pageTitle: 'Login',
+              user: req.session.user,
+              messageType: 'error',
+              message: 'Incorrect password',
+              oldInput: { email: email },
             });
           }
 

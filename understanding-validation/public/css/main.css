@@ -253,6 +253,21 @@ button.main-header__logout:focus {
   color: #858585;
 }
 
+.form-control.invalid label {
+  color: #a70000;
+}
+
+.form-control.invalid input,
+.form-control.invalid textarea,
+.form-control.invalid input:active,
+.form-control.invalid input:focus,
+.form-control.invalid textarea:active,
+.form-control.invalid textarea:focus {
+  border: 1px solid #885252;
+  background: #ffdddd;
+  outline-color: #885252;
+}
+
 .user-message {
   margin: auto;
   width: 90%;
