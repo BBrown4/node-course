@@ -9,14 +9,18 @@
         <% if (errorMessage) { %>
             <div class="user-message user-message__error"><%= errorMessage %></div>
         <% } %>
-        <form class="product-form" action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST">
+        <form class="product-form" action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
             <div class="form-control <%= validationErrors.find(e => e.param === 'title') ? 'invalid' : '' %> ">
                 <label for="title">Title</label>
                 <input type="text" name="title" id="title" autocomplete="off" autofocus="on" value="<%= (editing || hasError) ? product.title : '' %>">
             </div>
-            <div class="form-control <%= validationErrors.find(e => e.param === 'imageUrl') ? 'invalid' : '' %>">
+            <!-- <div class="form-control <%= validationErrors.find(e => e.param === 'imageUrl') ? 'invalid' : '' %>">
                 <label for="imageUrl">Image URL</label>
                 <input type="text" name="imageUrl" id="imageUrl" autocomplete="off" value="<%= (editing || hasError) ? product.imageUrl : '' %>">
+            </div> -->
+            <div class="form-control">
+                <label for="image">Image URL</label>
+                <input type="file" name="image" id="image">
             </div>
             <div class="form-control <%= validationErrors.find(e => e.param === 'price') ? 'invalid' : '' %>">
                 <label for="price">Price</label>

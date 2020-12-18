@@ -11,6 +11,8 @@ const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const csrf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
+const { v4: uuid } = require('uuid');
 
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
@@ -32,13 +34,39 @@ const app = express();
 // app.set('view engine', 'hbs');
 
 const csrfProtection = csrf();
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${uuid()}-${file.originalname}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  console.log(file);
+  if (
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
 app.use(flash());
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
+);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 const sessionStore = new SequelizeStore({
   db: sequelize,

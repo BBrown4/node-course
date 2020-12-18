@@ -1,6 +1,7 @@
 const Product = require('../models/product.model');
 const User = require('../models/user.model');
 const { validationResult } = require('express-validator');
+const fileHelper = require('../util/file');
 
 exports.getAddProduct = (req, res) => {
   res.render('admin/edit-product', {
@@ -16,16 +17,32 @@ exports.getAddProduct = (req, res) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
   const errors = validationResult(req);
+
+  if (!image) {
+    return res.status(422).render('admin/edit-product', {
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      pageTitle: 'Add product',
+      path: '/admin/edit-product',
+      editing: false,
+      user: req.session.user,
+      hasError: true,
+      errorMessage: 'Attached file must be of type: .png, .jpg, or .jpeg',
+      validationErrors: [],
+    });
+  }
 
   if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
       },
@@ -38,6 +55,7 @@ exports.postAddProduct = (req, res, next) => {
       validationErrors: errors.array(),
     });
   }
+  const imageUrl = image.path;
 
   User.findByPk(req.session.user.id)
     .then(user => {
@@ -92,7 +110,7 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImgUrl = req.body.imageUrl;
+  const image = req.file;
   const updatedDescription = req.body.description;
   const errors = validationResult(req);
 
@@ -101,7 +119,6 @@ exports.postEditProduct = (req, res, next) => {
       product: {
         id: prodId,
         title: updatedTitle,
-        imageUrl: updatedImgUrl,
         price: updatedPrice,
         description: updatedDescription,
       },
@@ -121,9 +138,12 @@ exports.postEditProduct = (req, res, next) => {
 
       product.title = updatedTitle;
       product.price = updatedPrice;
-      product.imageUrl = updatedImgUrl;
       product.description = updatedDescription;
 
+      if (image) {
+        fileHelper.deleteFile(product.imageUrl);
+        product.imageUrl = image.path;
+      }
       return product.save();
     })
     .then(() => {
@@ -138,7 +158,7 @@ exports.postDeleteProduct = (req, res, next) => {
   Product.findByPk(req.body.productId)
     .then(product => {
       if (product.userId !== req.session.user.id) return next();
-
+      fileHelper.deleteFile(product.imageUrl);
       return product.destroy();
     })
     .then(() => {
