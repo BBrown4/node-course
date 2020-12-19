@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const sequelize = require('./util/db');
 const app = express();
 
 const feedRoutes = require('./routes/feed.routes');
@@ -8,18 +9,24 @@ const feedRoutes = require('./routes/feed.routes');
 app.use(bodyParser.json()); //application json
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, PATCH, DELETE'
-  );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, PATCH, DELETE'
+    );
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
 });
 
 app.use('/feed', feedRoutes);
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+sequelize
+    // .sync({force: true})
+    .sync()
+    .then(() => {
+        const PORT = process.env.PORT || 8080;
+        app.listen(PORT, () => {
+            console.log(`Server started on port ${PORT}`);
+        });
+    })
+    .catch(err => console.log(err));
