@@ -65,7 +65,7 @@ class Feed extends Component {
               imagePath: post.imageUrl,
             };
           }),
-          totalPosts: resData.totalItems,
+          totalPosts: resData.totalItems.count,
           postsLoading: false,
         });
       })
