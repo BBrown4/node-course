@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { validationResult } = require('express-validator');
 const Post = require('../models/post.model');
+const User = require('../models/user.model');
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -49,17 +50,29 @@ exports.createPost = (req, res, next) => {
   const imageUrl = req.file.path;
   const title = req.body.title;
   const content = req.body.content;
-  //create a post in the db
 
-  Post.create({
-    title: title,
-    imageUrl: imageUrl,
-    content: content,
-    creator: {
-      name: 'Brandon',
-    },
-  })
+  User.findByPk(res.locals.decodedToken.userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error('User not found');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      return user.createPost({
+        title: title,
+        imageUrl: imageUrl,
+        content: content,
+        creator: { name: user.name },
+      });
+    })
     .then((result) => {
+      if (!result) {
+        const error = new Error('Something went wrong');
+        error.statusCode = 500;
+        throw error;
+      }
+
       res.status(201).json({
         message: 'Post created successfully',
         post: result,
@@ -69,6 +82,7 @@ exports.createPost = (req, res, next) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
+
       next(err);
     });
 };

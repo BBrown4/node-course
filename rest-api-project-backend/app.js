@@ -70,7 +70,7 @@ app.use((error, req, res, next) => {
 User.hasMany(Post);
 
 sequelize
-  // .sync({force: true})
+  // .sync({ force: true })
   // .sync({ alter: true })
   .sync()
   .then(() => {
