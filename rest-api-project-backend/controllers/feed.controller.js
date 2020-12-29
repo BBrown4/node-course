@@ -142,6 +142,12 @@ exports.updatePost = (req, res, next) => {
         throw error;
       }
 
+      if (post.userId !== res.locals.decodedToken.userId) {
+        const error = new Error('Not authorized to edit this post');
+        error.statusCode = 403;
+        throw error;
+      }
+
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
@@ -170,15 +176,19 @@ exports.deletePost = (req, res, next) => {
       if (!post) {
         const error = new Error('No post found');
         error.statusCode = 422;
-
         throw error;
       }
-      //check logged in user
+
+      if (post.userId !== res.locals.decodedToken.userId) {
+        const error = new Error('Not authorized to delete this post');
+        error.statusCode = 403;
+        throw error;
+      }
+
       clearImage(post.imageUrl);
       return post.destroy();
     })
     .then((result) => {
-      console.log(result);
       res.status(200).json({ message: 'Post deleted' });
     })
     .catch((err) => {
@@ -186,6 +196,63 @@ exports.deletePost = (req, res, next) => {
         err.statusCode = 500;
       }
 
+      next(err);
+    });
+};
+
+exports.getStatus = (req, res, next) => {
+  const userId = res.locals.decodedToken.userId;
+  User.findByPk(userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error('No user found');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      res.status(200).json({
+        status: user.status,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.setStatus = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed. Status cannot be empty');
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const userId = res.locals.decodedToken.userId;
+  User.findByPk(userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error('No user found');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      console.log(req);
+      user.status = req.body.status;
+
+      return user.save();
+    })
+    .then((result) => {
+      res
+        .status(200)
+        .json({ message: 'Status updated', status: result.status });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
       next(err);
     });
 };
