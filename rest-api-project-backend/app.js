@@ -74,8 +74,13 @@ sequelize
   .sync()
   .then(() => {
     const PORT = process.env.PORT || 8080;
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server started on port ${PORT}`);
+    });
+
+    const io = require('./socket').init(server);
+    io.on('connection', (socket) => {
+      console.log('Client connected');
     });
   })
   .catch((err) => console.log(err));
