@@ -14,6 +14,7 @@ exports.getPosts = async (req, res, next) => {
     const posts = await Post.findAll({
       offset: (currentPage - 1) * perPage,
       limit: perPage,
+      order: [['createdAt', 'DESC']],
     });
 
     res.status(200).json({
@@ -148,6 +149,7 @@ exports.updatePost = async (req, res, next) => {
     post.imageUrl = imageUrl;
 
     const result = await post.save();
+    io.getIO().emit('posts', { action: 'update', post: result });
     res.status(200).json({ message: 'Post updated!', post: result });
   } catch (err) {
     if (!err.statusCode) {
@@ -174,7 +176,7 @@ exports.deletePost = async (req, res, next) => {
 
     clearImage(post.imageUrl);
     const result = await post.destroy();
-
+    io.getIO().emit('posts', { action: 'delete', post: post.id });
     res.status(200).json({ message: 'Post deleted', result: result });
   } catch (err) {
     if (!err.statusCode) {
