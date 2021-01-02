@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const jwtSecret = 'd8315c0d-d54f-4c1d-9a40-af883d602591'; //consider storing this in some sort of config file
+const { clearImage } = require('../util/file');
 
 module.exports = {
   createUser: async function ({ userInput }, req) {
@@ -147,5 +148,105 @@ module.exports = {
       }),
       totalPosts: totalPosts.count,
     };
+  },
+  post: async function ({ id }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+
+    const post = await Post.findByPk(id, { include: User });
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    const result = {
+      ...post.dataValues,
+      creator: { ...post.dataValues.user.dataValues },
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    };
+
+    //cleanup the object that we're returning
+    delete result.user;
+    delete result.creator.password;
+
+    return result;
+  },
+  updatePost: async function ({ id, postInput }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+
+    const post = await Post.findByPk(id);
+
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    if (post.userId !== req.userId) {
+      const error = new Error('Not authorized');
+      error.code = 403;
+      throw error;
+    }
+
+    const errors = [];
+    if (
+      validator.isEmpty(postInput.title) ||
+      !validator.isLength(postInput.title, { min: 3 })
+    ) {
+      errors.push({ message: 'Title must be at least 3 characters' });
+    }
+
+    if (
+      validator.isEmpty(postInput.content) ||
+      !validator.isLength(postInput.content, { min: 3 })
+    ) {
+      errors.push({ message: 'Content must be at least 3 characters' });
+    }
+
+    if (errors.length > 0) {
+      const error = new Error('Invalid input');
+      error.data = errors;
+      error.code = 422;
+      throw error;
+    }
+
+    post.title = postInput.title;
+    post.content = postInput.content;
+    if (postInput.imageUrl !== 'undefined') {
+      post.imageUrl = postInput.imageUrl;
+    }
+    const updatedPost = await post.save();
+
+    return {
+      ...updatedPost.dataValues,
+      createdAt: updatedPost.createdAt.toISOString(),
+      updatedAt: updatedPost.updatedAt.toISOString(),
+    };
+  },
+  deletePost: async function ({ id }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+
+    const post = await Post.findByPk(id);
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    if (post.userId !== req.userId) {
+      const error = new Error('Not authorized');
+      error.code = 403;
+      throw error;
+    }
+    clearImage(post.imageUrl);
+    await post.destroy();
+    return true;
   },
 };

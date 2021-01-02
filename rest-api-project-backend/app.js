@@ -9,6 +9,7 @@ const { graphqlHTTP } = require('express-graphql');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth.middleware');
+const { clearImage } = require('./util/file');
 
 const User = require('./models/user.model');
 const Post = require('./models/post.model');
@@ -59,6 +60,23 @@ app.use((req, res, next) => {
 
 app.use(auth);
 
+app.put('/post-image', (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error('Not authorized');
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: 'No file provided' });
+  }
+
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+
+  return res
+    .status(201)
+    .json({ message: 'File stored', filePath: req.file.path });
+});
+
 app.use(
   '/graphql',
   graphqlHTTP({
@@ -90,6 +108,7 @@ app.use((error, req, res, next) => {
 });
 
 User.hasMany(Post, { onDelete: 'CASCADE', hooks: true });
+Post.belongsTo(User);
 
 sequelize
   // .sync({ force: true })
