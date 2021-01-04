@@ -237,7 +237,9 @@ module.exports = {
 
     const post = await Post.findByPk(id);
     if (!post) {
-      throw new Error('Post not found');
+      const error = new Error('Post not found');
+      error.code = 404;
+      throw error;
     }
 
     if (post.userId !== req.userId) {
@@ -248,5 +250,38 @@ module.exports = {
     clearImage(post.imageUrl);
     await post.destroy();
     return true;
+  },
+  user: async function (args, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findByPk(req.userId);
+    if (!user) {
+      const error = new Error('User not found');
+      error.code = 404;
+      throw error;
+    }
+
+    return { ...user.dataValues };
+  },
+  updateStatus: async function ({ status }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findByPk(req.userId);
+    if (!user) {
+      const error = new Error('User not found');
+      error.code = 404;
+      throw error;
+    }
+
+    user.status = status;
+    await user.save();
+
+    return { ...user.dataValues };
   },
 };
